@@ -17,10 +17,8 @@ func main() {
 
 	creds, err := credentials.NewClientTLSFromFile(cret, "")
 	if err != nil {
-		log.Fatalln("Failed to load credentials: ", err);
+		log.Fatalln("Failed to load credentials: ", err)
 	}
-
-
 
 	addr := "localhost:50051"
 
@@ -32,22 +30,33 @@ func main() {
 
 	defer conn.Close()
 
-	client := pb.NewCalculatorClient(conn)
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	req := pb.AddRequest{
+	addClient := pb.NewCalculatorClient(conn)
+	addReq := &pb.AddRequest{
 		A: 10,
 		B: 60,
 	}
-	res, err := client.Add(ctx, &req)
+	addRes, err := addClient.Add(ctx, addReq)
 
 	if err != nil {
 		log.Fatalln("Could not add: ", err)
 	}
 
-	log.Println("Sum: ", res.Sum)
+	log.Println("Sum: ", addRes.Sum)
+
+	//greeter
+	greeterClient := pb.NewGreeterClient(conn)
+
+	greeterReq := &pb.HelloRequest{Name: "Satyam"}
+
+	greeterRes, err := greeterClient.Greet(ctx, greeterReq)
+
+	if err != nil {
+		log.Fatalln("Greeter failed: ", err)
+	}
+
+	log.Println("[Greeter]: ", greeterRes.Message)
 
 	connState := conn.GetState()
 	fmt.Println("Connection state: ", connState)

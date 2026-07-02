@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 
@@ -12,6 +13,7 @@ import (
 
 type server struct {
 	pb.UnimplementedCalculatorServer
+	pb.UnimplementedGreeterServer
 }
 
 func (s *server) Add(ctx context.Context, req *pb.AddRequest) (*pb.AddResponse, error) {
@@ -20,6 +22,14 @@ func (s *server) Add(ctx context.Context, req *pb.AddRequest) (*pb.AddResponse, 
 	log.Println("Sum: ", sum)
 	return &pb.AddResponse{
 		Sum: sum,
+	}, nil
+}
+
+func (s *server) Greet(ctx context.Context, req *pb.HelloRequest) (*pb.HelloResponse, error){
+
+
+	return &pb.HelloResponse{
+		Message: fmt.Sprintf("Hello %s, nice to meet you, ", req.Name),
 	}, nil
 }
 
@@ -43,6 +53,7 @@ func main() {
 	grpcServer := grpc.NewServer(grpc.Creds(creds))
 
 	pb.RegisterCalculatorServer(grpcServer, &server{})
+	pb.RegisterGreeterServer(grpcServer, &server{})
 
 	log.Println("Server is running on port", port)
 
