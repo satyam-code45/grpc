@@ -7,40 +7,48 @@ import (
 
 	pb "github.com/satyam-code45/grpc/server/proto/gen"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
-type server struct{
+type server struct {
 	pb.UnimplementedCalculatorServer
 }
 
-func(s *server) Add(ctx context.Context, req *pb.AddRequest) (*pb.AddResponse, error){
-	sum := req.A + req.B;
+func (s *server) Add(ctx context.Context, req *pb.AddRequest) (*pb.AddResponse, error) {
+	sum := req.A + req.B
 
-	log.Println("Sum: ", sum);
+	log.Println("Sum: ", sum)
 	return &pb.AddResponse{
 		Sum: sum,
 	}, nil
 }
 
-func main(){
-	port := ":50051";
-	lis, err := net.Listen("tcp", port);
+func main() {
+	cert := "cert.pem"
+	key := "key.pem"
+
+	port := ":50051"
+	lis, err := net.Listen("tcp", port)
 
 	if err != nil {
-		log.Fatalln("Failed to listen", err);
+		log.Fatalln("Failed to listen", err)
 	}
 
-	grpcServer := grpc.NewServer();
+	creds, err := credentials.NewServerTLSFromFile(cert, key)
+
+	if err != nil {
+		log.Fatalln("Failed to load credentials", err)
+	}
+
+	grpcServer := grpc.NewServer(grpc.Creds(creds))
 
 	pb.RegisterCalculatorServer(grpcServer, &server{})
 
-	log.Println("Server is running on port", port);
+	log.Println("Server is running on port", port)
 
-	err = grpcServer.Serve(lis);
+	err = grpcServer.Serve(lis)
 
 	if err != nil {
-		log.Fatalln("Failed to serve: ", err);
+		log.Fatalln("Failed to serve: ", err)
 	}
 }
-
-

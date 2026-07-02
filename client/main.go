@@ -2,19 +2,29 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials"
 
 	pb "github.com/satyam-code45/grpc/client/proto/gen"
 )
 
 func main() {
+	cret := "cert.pem"
+
+	creds, err := credentials.NewClientTLSFromFile(cret, "")
+	if err != nil {
+		log.Fatalln("Failed to load credentials: ", err);
+	}
+
+
+
 	addr := "localhost:50051"
 
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(creds))
 
 	if err != nil {
 		log.Fatalln("Did not connect: ", err)
@@ -38,4 +48,7 @@ func main() {
 	}
 
 	log.Println("Sum: ", res.Sum)
+
+	connState := conn.GetState()
+	fmt.Println("Connection state: ", connState)
 }
