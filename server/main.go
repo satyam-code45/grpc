@@ -27,7 +27,7 @@ func main(){
 	lis, err := net.Listen("tcp", port);
 
 	if err != nil {
-		log.Fatal("Failed to listen", err);
+		log.Fatalln("Failed to listen", err);
 	}
 
 	grpcServer := grpc.NewServer();
@@ -39,7 +39,7 @@ func main(){
 	err = grpcServer.Serve(lis);
 
 	if err != nil {
-		log.Fatal("Failed to serve: ", err);
+		log.Fatalln("Failed to serve: ", err);
 	}
 }
 
